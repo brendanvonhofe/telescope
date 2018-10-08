@@ -1,0 +1,123 @@
+* Telescope
+Kevin Poli, Phil Vitale, Connor O'Hara and Brendan Von Hofe
+* Intro
+Telescope is a machine learning assisted toolkit for digital video compositors
+with applications in visual effects, matte painting and diverse use cases
+accross the video post production pipeline. Tools from existing compositing
+packages will interact with a novel ML core to assist or completely automate the
+rotoscoping process. Rotoscoping is the process of masking and segmenting
+poritons of an image accross multiple moving frames, any feature length movie
+will often consist of hundreds of rotoscoped shots with multiple tracked mattes
+per image, and this is the primary job of thousands of roto artists accross the world.
+
+We hope to make this process, fast, intuitive, and accesible to alleviate the
+manual and time consuming process that makes up a huge chunk of the man hours
+required to produce even low budget features. We believe that machine learning
+is in the process of revolutionizing image processing, and that user driven
+toolkits rather than black box command line workflows will bring our intelligent
+core into the hands of the artists where they can thrive.
+** Demonstration
+Here is an example of several features on an image, segmented or masked on a
+single frame, this is the atomic process of rotoscoping. 
+
+#+attr_html: :width 100px
+#+attr_latex: :width 100px
+[[./rscope.jpg]]
+When this process is repeated, or rather modifyied for each subsequent frame in
+a video, you can produce a video of any isolated feature on a transparent plate
+for further compositing.
+
+#+attr_html: :width 100px
+#+attr_latex: :width 100px
+[[./rotoscope.png]]
+This image shows how masks can change with the movement of a distinct feature,
+namely a figure isolated in every frame of walking to sit. It is highly
+noteworthy that both of the demonstrated processes are done completely by hand,
+which we aim to make obsolete.
+
+* Technical Plan
+** Components
+Telescope as a product will consist of two primary modules, the Telescope Core,
+which is a machine learning core assisted by traditional algorithmics that
+implements the novel functionality of Telescope, and an exchange plugin that
+allows existing professional compositing tools to interact with our proccesses.
+Telescope For Nuke is our chosen example exhange plugin, designed to demonstrate
+how the Telescope core can interact with existing artist workflows - but the
+separation of core and plugin is designed such that Telescope can be implemented
+into other software packages like Adobe After Effects or Blackmagic Design
+Fusion at a later date.
+
+| Category                     | What are we using?     |
+|------------------------------+------------------------|
+| Communication                |                        |
+| Email                        | Gmail                  |
+| Web Conferencing             | Facebook Video         |
+| Instant Messaging            | GroupMe                |
+| Collaboration                |                        |
+| Document Collaboration       | Google Drive           |
+| File Sharing/Data Tracking   | GitHub                 |
+| Plugin Development           |                        |
+| OS Supported                 | Windows, Mac OS, Linux |
+| Host Application             | Nuke                   |
+| Development Language         | C++                    |
+| Machine Learning Development |                        |
+| Development Language         | Python                 |
+| Packages                     | PyTorch                |
+** Algorithmics
+
+The algorithmic core of our plugin will take images (frames of videos) as input and output segmentation masks (mattes) as output. The goal of the masks is to identify all the discrete objects in the image. It is class-agnostic and therefore does not need to determine what the objects are (e.g. cat or dog) but rather the fact that they are discrete.
+Our criteria for determining how well our model is accomplishing the task is the Intersection-over-Union metric (IoU). We have yet to determine what an acceptable IoU score is for industry applications.
+The model will be a convolutional neural network. Specifically, we will begin with the UNet model (https://arxiv.org/abs/1505.04597). Initially, our primary dataset to train the model with will be the Panoptic Detection COCO dataset, modified for a class-agnostic task.
+Further iterations of the model will take advantage of the additional information in EXR images to refine object mattes and the DAVIS video object segmentation dataset.
+
+** Dependency Model
+[[./DGraph.svg]]
+
+
+
+* Team
+** Roles 
+- Connor O’Hara: Image Processing (cohara1@stevens.edu)
+- Kevin Poli: Application/ Artist Tools Developer (kpoli@stevens.edu)
+- Philip Vitale: Application & Systems Developer (pvitale@stevens.edu)
+- Brendan von Hofe: Machine Learning (bvonhofe@stevens.edu)
+  
+Advisors: Hong Man (hman@stevens.edu), Jeff Thompson (JThomps4@stevens.edu)
+
+ 
+** Delegation of Tasks
+
+*Connor O’Hara*
+*** Last Week
+    - Continue contact with Venture Center
+      - we have a primary contact, but still waiting to be met with
+*** This week 
+    - Research Generative Ladder Networks
+ 
+      
+*Kevin Poli*
+*** Last Week
+    - Acquire developer license for Nuke
+      - Working on trial version until license is acquired
+*** This week 
+    - Follow along with Nuke developer tutorials, implement Nuke boilerplate
+      
+*Philip Vitale*
+*** Last week
+    - Nuke API research
+      - Noted and shared video tutorials and downloaded the manual
+*** This week 
+    - Follow along with Nuke developer tutorials, implement Nuke boilerplate
+*Brendan Von Hofe*
+*** Last Week
+    - Define image processing model
+*** This Week
+    - Researching how to improve older partial solutions DeepMask/SharpMask
+    - https://github.com/facebookresearch/deepmask 
+    
+Team  
+*** Updates
+- Meet with Visual Arts department
+  - Move forward taking them on as our client, Hong Man will remain Advisor
+- Attend tech meetup for capital/business opportunity
+  - Machine learning meetup October 4th 
