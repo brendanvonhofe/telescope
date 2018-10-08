@@ -1,5 +1,8 @@
+#+LATEX_HEADER_EXTRA: \usepackage{helvet}
+#+LATEX_CLASS_OPTIONS: [15pt]
 * Telescope
 Kevin Poli, Phil Vitale, Connor O'Hara and Brendan Von Hofe
+Advisors: Hong Man (hman@stevens.edu), Jeff Thompson (JThomps4@stevens.edu)
 * Intro
 Telescope is a machine learning assisted toolkit for digital video compositors
 with applications in visual effects, matte painting and diverse use cases
@@ -53,6 +56,11 @@ isolating, here is the next frame of that video, with an adjusted selection for
 clarity
 
   [[./roto/nextframe.PNG]]
+
+to see how the selections should move as features in the video move, check out
+this gif that displays the matte on the left, with the source on the right, and
+has selection lines on both
+https://www.google.com/url?sa=i&rct=j&q=&esrc=s&source=images&cd=&cad=rja&uact=8&ved=2ahUKEwj4poGei_bdAhVvTt8KHYSXBs0QjRx6BAgBEAU&url=https%3A%2F%2Ftaukeke.com%2F2014%2F07%2Frotoscoping-in-nuke%2F&psig=AOvVaw0rzB0nhBNxm_0WD1VdybtL&ust=1539062086451365
 *** Use Cases
 With our selection isolated, we can start to play with the image accordingly
 
@@ -74,7 +82,7 @@ We can grab our source clip and place the square image on top
   [[./roto/halfcomp.PNG]]
 Then grab our rotoscoped face and hand and place that on top
   [[./roto/void.PNG]]
-And place it on top for the desired effect
+and here is the desired effect
 
   [[./roto/behind.PNG]]
 * Technical Plan
@@ -113,8 +121,10 @@ The model will be a convolutional neural network. Specifically, we will begin wi
 Further iterations of the model will take advantage of the additional information in EXR images to refine object mattes and the DAVIS video object segmentation dataset.
 
 ** Dependency Model
-[[./DGraph.svg]]
-
+#+BEGIN_center
+#+ATTR_LATEX: :width 18cm :center nil
+[[./Dgraph.pdf]]
+#+END_center
 
 
 * Team
@@ -124,42 +134,49 @@ Further iterations of the model will take advantage of the additional informatio
 - Philip Vitale: Application & Systems Developer (pvitale@stevens.edu)
 - Brendan von Hofe: Machine Learning (bvonhofe@stevens.edu)
   
-Advisors: Hong Man (hman@stevens.edu), Jeff Thompson (JThomps4@stevens.edu)
 
  
 ** Delegation of Tasks
 
-*Connor O’Hara*
-*** Last Week
-    - Continue contact with Venture Center
-      - we have a primary contact, but still waiting to be met with
-*** This week 
-    - Research Generative Ladder Networks
- 
-      
-*Kevin Poli*
-*** Last Week
-    - Acquire developer license for Nuke
-      - Working on trial version until license is acquired
-*** This week 
-    - Follow along with Nuke developer tutorials, implement Nuke boilerplate
-      
-*Philip Vitale*
-*** Last week
-    - Nuke API research
-      - Noted and shared video tutorials and downloaded the manual
-*** This week 
-    - Follow along with Nuke developer tutorials, implement Nuke boilerplate
-*Brendan Von Hofe*
-*** Last Week
-    - Define image processing model
-*** This Week
-    - Researching how to improve older partial solutions DeepMask/SharpMask
-    - https://github.com/facebookresearch/deepmask 
-    
-Team  
-*** Updates
-- Meet with Visual Arts department
-  - Move forward taking them on as our client, Hong Man will remain Advisor
-- Attend tech meetup for capital/business opportunity
-  - Machine learning meetup October 4th 
+*** Connor O’Hara
+**** Last Week
+- Research Generative Ladder Networks
+**** Update
+- Research of Trimatte(explained later) has made this approach possibly obsolete
+**** For Next week
+- Begin containerizing relevant binaries for Nuke, compilers and everything required
+  to develop the project in Docker
+*** Kevin Poli
+**** Last Week
+- Follow along with Nuke developer tutorials, implement Nuke boilerplate
+**** Update
+- Boilerplate requires additional mockups and ui paradigms as machine learning
+  team is still developing their workflow
+**** For Next Week
+- Design Mockups for every UI paradigm, and every node. I.e how the user will
+  interact with our core via Nuke
+*** Phil Vitale
+**** Last Week
+- Follow along with Nuke developer tutorials, implement Nuke boilerplate
+**** Update
+- Boilerplate requires additional mockups and ui paradigms as machine learning
+  team is still developing their workflow
+**** For Next Week
+- Research how the paradigms and mockups described above can be implemented in
+  the Qt UI toolkit
+
+*** Brendan Von Hofe
+**** Last Week
+- Research DeepMask and SharpMask partial solutions
+
+**** Update
+- Discovered newer research paper “Deep Image Matting” that shows very promising results with segmenting (matting) images. (This does not include tracking these objects throughout videos which will be a later stage.) https://arxiv.org/pdf/1703.03872.pdf
+The paper uses a similar encoder-decoder fully convolutional architecture originally specified (a.k.a. UNet).
+Differences include a second fully convolutional network that does not downsample or upsample the image, used for refining the image matte.
+They use novel loss functions dubbed the alpha-prediction loss and the compositional loss.
+Alpha-prediction loss is the difference in predicted alpha values at each picture of the image mask (matte) from the ground truth.
+Compositional loss is the difference in RGB values of the predicted composited photo (foreground, background, and alpha mask) and the ground truth composite.
+They also generate a novel dataset by carefully rotoscoping ~500 objects and then compositing them with thousands of images.
+**** For Next Week
+Either procure the dataset from the authors of the paper or begin the process of recreating one.
+Implement baseline model.

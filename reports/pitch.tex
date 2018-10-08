@@ -1,6 +1,6 @@
-% Created 2018-10-07 Sun 23:58
+% Created 2018-10-08 Mon 01:16
 % Intended LaTeX compiler: pdflatex
-\documentclass[11pt]{article}
+\documentclass[15pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{graphicx}
@@ -14,6 +14,7 @@
 \usepackage{amssymb}
 \usepackage{capt-of}
 \usepackage{hyperref}
+\usepackage{helvet}
 \author{Kevin Poli}
 \date{\today}
 \title{}
@@ -29,10 +30,11 @@
 \tableofcontents
 
 \section{Telescope}
-\label{sec:org08d2e3a}
+\label{sec:orgb5dae43}
 Kevin Poli, Phil Vitale, Connor O'Hara and Brendan Von Hofe
+Advisors: Hong Man (hman@stevens.edu), Jeff Thompson (JThomps4@stevens.edu)
 \section{Intro}
-\label{sec:orgdd20d79}
+\label{sec:org3168d0f}
 Telescope is a machine learning assisted toolkit for digital video compositors
 with applications in visual effects, matte painting and diverse use cases
 accross the video post production pipeline. Tools from existing compositing
@@ -49,7 +51,7 @@ is in the process of revolutionizing image processing, and that user driven
 toolkits rather than black box command line workflows will bring our intelligent
 core into the hands of the artists where they can thrive.
 \subsection{Demonstration}
-\label{sec:org44dcadf}
+\label{sec:org18f8651}
 Rotoscoping is the process of frame by frame selecting and isolating a given feature (usually
 an object or person) in a video, such that you can produce a video clip of
 exclusively that selection on a transparent background
@@ -93,7 +95,7 @@ selected before
 \end{itemize}
 \end{itemize}
 \subsubsection{Frame By Frame}
-\label{sec:org2723b87}
+\label{sec:orgbc621ed}
 Much of the challenge and tedium of rotoscoping comes from repeating the above
 process for every frame, traditionally, artists will go frame by frame through
 the video and manually adjust their selections to match the feature they are
@@ -103,8 +105,13 @@ clarity
 \begin{center}
 \includegraphics[width=.9\linewidth]{./roto/nextframe.PNG}
 \end{center}
+
+to see how the selections should move as features in the video move, check out
+this gif that displays the matte on the left, with the source on the right, and
+has selection lines on both
+\url{https://www.google.com/url?sa=i\&rct=j\&q=\&esrc=s\&source=images\&cd=\&cad=rja\&uact=8\&ved=2ahUKEwj4poGei\_bdAhVvTt8KHYSXBs0QjRx6BAgBEAU\&url=https\%3A\%2F\%2Ftaukeke.com\%2F2014\%2F07\%2Frotoscoping-in-nuke\%2F\&psig=AOvVaw0rzB0nhBNxm\_0WD1VdybtL\&ust=1539062086451365}
 \subsubsection{Use Cases}
-\label{sec:orge055300}
+\label{sec:org0cd51f8}
 With our selection isolated, we can start to play with the image accordingly
 
 By layering the source footage and our rotoscoped hand and face, we can apply an
@@ -115,7 +122,7 @@ effect, like the 'colorama' effect to only the pixels we roto'd previously
 \end{center}
 \begin{enumerate}
 \item Compositing
-\label{sec:org3873182}
+\label{sec:org9aa1bbb}
 The most popular use case for rotoscoping is Compositing, which is the process
 of combining multiple images into one. Consider three layers to see how this is
 done.
@@ -135,16 +142,16 @@ Then grab our rotoscoped face and hand and place that on top
   \begin{center}
 \includegraphics[width=.9\linewidth]{./roto/void.PNG}
 \end{center}
-And place it on top for the desired effect
+and here is the desired effect
 
 \begin{center}
 \includegraphics[width=.9\linewidth]{./roto/behind.PNG}
 \end{center}
 \end{enumerate}
 \section{Technical Plan}
-\label{sec:org5c42796}
+\label{sec:orgab6cf12}
 \subsection{Components}
-\label{sec:org239a824}
+\label{sec:org391378b}
 Telescope as a product will consist of two primary modules, the Telescope Core,
 which is a machine learning core assisted by traditional algorithmics that
 implements the novel functionality of Telescope, and an exchange plugin that
@@ -176,7 +183,7 @@ Packages & PyTorch\\
 \end{tabular}
 \end{center}
 \subsection{Algorithmics}
-\label{sec:org08ca268}
+\label{sec:orge205cba}
 
 The algorithmic core of our plugin will take images (frames of videos) as input and output segmentation masks (mattes) as output. The goal of the masks is to identify all the discrete objects in the image. It is class-agnostic and therefore does not need to determine what the objects are (e.g. cat or dog) but rather the fact that they are discrete.
 Our criteria for determining how well our model is accomplishing the task is the Intersection-over-Union metric (IoU). We have yet to determine what an acceptable IoU score is for industry applications.
@@ -184,17 +191,16 @@ The model will be a convolutional neural network. Specifically, we will begin wi
 Further iterations of the model will take advantage of the additional information in EXR images to refine object mattes and the DAVIS video object segmentation dataset.
 
 \subsection{Dependency Model}
-\label{sec:org04cf880}
+\label{sec:orgb6f315a}
 \begin{center}
-\includesvg[width=.9\linewidth]{./DGraph}
+\includegraphics[width=18cm]{./Dgraph.pdf}
 \end{center}
 
 
-
 \section{Team}
-\label{sec:orgd19d869}
+\label{sec:org5549106}
 \subsection{Roles}
-\label{sec:org4726946}
+\label{sec:orgbfa8ebf}
 \begin{itemize}
 \item Connor O’Hara: Image Processing (cohara1@stevens.edu)
 \item Kevin Poli: Application/ Artist Tools Developer (kpoli@stevens.edu)
@@ -202,81 +208,97 @@ Further iterations of the model will take advantage of the additional informatio
 \item Brendan von Hofe: Machine Learning (bvonhofe@stevens.edu)
 \end{itemize}
 
-Advisors: Hong Man (hman@stevens.edu), Jeff Thompson (JThomps4@stevens.edu)
 
 
 \subsection{Delegation of Tasks}
-\label{sec:orge8e8cad}
+\label{sec:orgf1da5b0}
 
-\textbf{Connor O’Hara}
-\subsubsection{Last Week}
-\label{sec:org5d1663a}
-\begin{itemize}
-\item Continue contact with Venture Center
-\begin{itemize}
-\item we have a primary contact, but still waiting to be met with
-\end{itemize}
-\end{itemize}
-\subsubsection{This week}
-\label{sec:org90d9eae}
+\subsubsection{Connor O’Hara}
+\label{sec:orga28108c}
+\begin{enumerate}
+\item Last Week
+\label{sec:orgac17977}
 \begin{itemize}
 \item Research Generative Ladder Networks
 \end{itemize}
-
-
-\textbf{Kevin Poli}
-\subsubsection{Last Week}
-\label{sec:orgaa0c34c}
+\item Update
+\label{sec:orgb665fea}
 \begin{itemize}
-\item Acquire developer license for Nuke
+\item Research of Trimatte(explained later) has made this approach possibly obsolete
+\end{itemize}
+\item For Next week
+\label{sec:org4a5e17a}
 \begin{itemize}
-\item Working on trial version until license is acquired
+\item Begin containerizing relevant binaries for Nuke, compilers and everything required
+to develop the project in Docker
 \end{itemize}
-\end{itemize}
-\subsubsection{This week}
-\label{sec:orgb708ebc}
-\begin{itemize}
-\item Follow along with Nuke developer tutorials, implement Nuke boilerplate
-\end{itemize}
-
-\textbf{Philip Vitale}
-\subsubsection{Last week}
-\label{sec:org3c0adeb}
-\begin{itemize}
-\item Nuke API research
-\begin{itemize}
-\item Noted and shared video tutorials and downloaded the manual
-\end{itemize}
-\end{itemize}
-\subsubsection{This week}
-\label{sec:org4a4f2e7}
+\end{enumerate}
+\subsubsection{Kevin Poli}
+\label{sec:orgfe46f40}
+\begin{enumerate}
+\item Last Week
+\label{sec:orga07182d}
 \begin{itemize}
 \item Follow along with Nuke developer tutorials, implement Nuke boilerplate
 \end{itemize}
-\textbf{Brendan Von Hofe}
-\subsubsection{Last Week}
-\label{sec:org4971971}
+\item Update
+\label{sec:orge8ca56b}
 \begin{itemize}
-\item Define image processing model
+\item Boilerplate requires additional mockups and ui paradigms as machine learning
+team is still developing their workflow
 \end{itemize}
-\subsubsection{This Week}
-\label{sec:orga3b66d3}
+\item For Next Week
+\label{sec:orgc52e48f}
 \begin{itemize}
-\item Researching how to improve older partial solutions DeepMask/SharpMask
-\item \url{https://github.com/facebookresearch/deepmask}
+\item Design Mockups for every UI paradigm, and every node. I.e how the user will
+interact with our core via Nuke
+\end{itemize}
+\end{enumerate}
+\subsubsection{Phil Vitale}
+\label{sec:orgd947613}
+\begin{enumerate}
+\item Last Week
+\label{sec:org04e1b6e}
+\begin{itemize}
+\item Follow along with Nuke developer tutorials, implement Nuke boilerplate
+\end{itemize}
+\item Update
+\label{sec:orgc406f85}
+\begin{itemize}
+\item Boilerplate requires additional mockups and ui paradigms as machine learning
+team is still developing their workflow
+\end{itemize}
+\item For Next Week
+\label{sec:org45ebf18}
+\begin{itemize}
+\item Research how the paradigms and mockups described above can be implemented in
+the Qt UI toolkit
+\end{itemize}
+\end{enumerate}
+
+\subsubsection{Brendan Von Hofe}
+\label{sec:org953dd5d}
+\begin{enumerate}
+\item Last Week
+\label{sec:orgddd90d4}
+\begin{itemize}
+\item Research DeepMask and SharpMask partial solutions
 \end{itemize}
 
-Team  
-\subsubsection{Updates}
-\label{sec:org9bb0323}
+\item Update
+\label{sec:org47af881}
 \begin{itemize}
-\item Meet with Visual Arts department
-\begin{itemize}
-\item Move forward taking them on as our client, Hong Man will remain Advisor
+\item Discovered newer research paper “Deep Image Matting” that shows very promising results with segmenting (matting) images. (This does not include tracking these objects throughout videos which will be a later stage.) \url{https://arxiv.org/pdf/1703.03872.pdf}
 \end{itemize}
-\item Attend tech meetup for capital/business opportunity
-\begin{itemize}
-\item Machine learning meetup October 4th
-\end{itemize}
-\end{itemize}
+The paper uses a similar encoder-decoder fully convolutional architecture originally specified (a.k.a. UNet).
+Differences include a second fully convolutional network that does not downsample or upsample the image, used for refining the image matte.
+They use novel loss functions dubbed the alpha-prediction loss and the compositional loss.
+Alpha-prediction loss is the difference in predicted alpha values at each picture of the image mask (matte) from the ground truth.
+Compositional loss is the difference in RGB values of the predicted composited photo (foreground, background, and alpha mask) and the ground truth composite.
+They also generate a novel dataset by carefully rotoscoping \textasciitilde{}500 objects and then compositing them with thousands of images.
+\item For Next Week
+\label{sec:org196c672}
+Either procure the dataset from the authors of the paper or begin the process of recreating one.
+Implement baseline model.
+\end{enumerate}
 \end{document}
