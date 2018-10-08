@@ -17,24 +17,66 @@ is in the process of revolutionizing image processing, and that user driven
 toolkits rather than black box command line workflows will bring our intelligent
 core into the hands of the artists where they can thrive.
 ** Demonstration
-Here is an example of several features on an image, segmented or masked on a
-single frame, this is the atomic process of rotoscoping. 
+Rotoscoping is the process of frame by frame selecting and isolating a given feature (usually
+an object or person) in a video, such that you can produce a video clip of
+exclusively that selection on a transparent background
 
-#+attr_html: :width 100px
-#+attr_latex: :width 100px
-[[./rscope.jpg]]
-When this process is repeated, or rather modifyied for each subsequent frame in
-a video, you can produce a video of any isolated feature on a transparent plate
-for further compositing.
+Lets walk through this step by step:
 
-#+attr_html: :width 100px
-#+attr_latex: :width 100px
-[[./rotoscope.png]]
-This image shows how masks can change with the movement of a distinct feature,
-namely a figure isolated in every frame of walking to sit. It is highly
-noteworthy that both of the demonstrated processes are done completely by hand,
-which we aim to make obsolete.
+- First, our source image at frame 1, of Marceu the Mime
+  [[./roto/Capture.PNG]]
+- Lets start by creating a selection just of the Mime's face and hand - these
+  are the features that are actually being "rotoscoped" out
+  [[./roto/masked.PNG]]
+- This purple selection represents a 'mask' which are the points and curves that
+  make up the boundary of what we are looking to isolate. Traditionally, artists
+  will digitally paint this selection in a software of their choice, by hand.
+- This selection or mask is different from a matte, which is another important
+  piece of terminology. A matte is a single channel image; meaning rather than
+  pixels having red,green,blue values, they only contain 1 value from 0-255
+  called 'alpha'. 'Alpha' will often be displayed in software as white. The
+  Matte of this selection is an image where only the pixels corresponding to the
+  selection are white, and all other pixels are black.
+  [[./roto/matte.PNG]]
+    - this is so that, under the hood, all we need to do is pixel-wise 'multiply' the
+      source image to the matte, meaning any pixels with a black 'zero value' in
+      the matte will become transparent, and any pixels in the white '255 value'
+      in the matte will remain.
+  [[./roto/goals.PNG]]
+  - Here is the result of that multiply, an image containing only the pixels we
+    selected before
+*** Frame By Frame
+Much of the challenge and tedium of rotoscoping comes from repeating the above
+process for every frame, traditionally, artists will go frame by frame through
+the video and manually adjust their selections to match the feature they are
+isolating, here is the next frame of that video, with an adjusted selection for
+clarity
 
+  [[./roto/nextframe.PNG]]
+*** Use Cases
+With our selection isolated, we can start to play with the image accordingly
+
+By layering the source footage and our rotoscoped hand and face, we can apply an
+effect, like the 'colorama' effect to only the pixels we roto'd previously
+
+  [[./roto/isolated.PNG]]
+**** Compositing
+The most popular use case for rotoscoping is Compositing, which is the process
+of combining multiple images into one. Consider three layers to see how this is
+done.
+
+Say we want this red square video clip to appear 'behind' the Mime's face and
+hand (note what appears black is acutally transparent)
+
+  [[./roto/red.PNG]]
+
+We can grab our source clip and place the square image on top
+  [[./roto/halfcomp.PNG]]
+Then grab our rotoscoped face and hand and place that on top
+  [[./roto/void.PNG]]
+And place it on top for the desired effect
+
+  [[./roto/behind.PNG]]
 * Technical Plan
 ** Components
 Telescope as a product will consist of two primary modules, the Telescope Core,
