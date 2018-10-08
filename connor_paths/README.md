@@ -4,4 +4,4 @@
 
 ![edge-detected elephant](elephant.png)
 
-![results of first attempt](results.png)
+![results of first attempt](result1.png)
