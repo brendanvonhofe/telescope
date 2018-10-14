@@ -1,8 +1,12 @@
-#+LATEX_HEADER_EXTRA: \usepackage{helvet}
+#+LATEX_HEADER_EXTRA: \usepackage[scaled]{helvet}
+#+LATEX_HEADER_EXTRA: \renewcommand\familydefault{\sfdefault}
+#+LATEX_HEADER_EXTRA: \usepackage[T1]{fontenc}
+#+LATEX_HEADER_EXTRA: \usepackage[left=2cm, right=2cm,top=2cm]{geometry}
 #+LATEX_CLASS_OPTIONS: [15pt]
 * Telescope
 Kevin Poli, Phil Vitale, Connor O'Hara and Brendan Von Hofe
-Advisors: Hong Man (hman@stevens.edu), Jeff Thompson (JThomps4@stevens.edu)
+** Advisors:
+Hong Man (hman@stevens.edu), Jeff Thompson (JThomps4@stevens.edu)
 * Intro
 Telescope is a machine learning assisted toolkit for digital video compositors
 with applications in visual effects, matte painting and diverse use cases
@@ -126,6 +130,14 @@ Further iterations of the model will take advantage of the additional informatio
 [[./Dgraph.pdf]]
 #+END_center
 
+** Completion Schedule
+| Applications        | Machine Learning                    | Week        |
+|---------------------+-------------------------------------+-------------|
+| TriMap Drawing Node | Recreating Deep Image Matting Paper | 10/14-10/21 |
+|                     | Stress Testing                      | 10/21-10/28 |
+|                     |                                     |             |
+|                     |                                     |             |
+
 
 * Team
 ** Roles 
@@ -140,35 +152,31 @@ Further iterations of the model will take advantage of the additional informatio
 
 *** Connor O’Hara
 **** Last Week
-- Research Generative Ladder Networks
+- Generative Ladder Networks deemed probably too bleeding edge to adopt, moved
+  on to other tasks
 **** Update
-- Research of Trimatte(explained later) has made this approach possibly obsolete
+- Research into single channel matte to bezier curves has panned out
 **** For Next week
-- Begin containerizing relevant binaries for Nuke, compilers and everything required
-  to develop the project in Docker
+- Stress test mattes -> curves, begin familiarity with PyTorch
 *** Kevin Poli
 **** Last Week
-- Follow along with Nuke developer tutorials, implement Nuke boilerplate
+- UI paradigm mockups
 **** Update
-- Boilerplate requires additional mockups and ui paradigms as machine learning
-  team is still developing their workflow
+- see included mockup of multi matte browsing in one node
 **** For Next Week
-- Design Mockups for every UI paradigm, and every node. I.e how the user will
-  interact with our core via Nuke
+- UI paradigm and mockup for drawing and frame by frame editing TriMap garbage
+  mattes
 *** Phil Vitale
 **** Last Week
-- Follow along with Nuke developer tutorials, implement Nuke boilerplate
+- UI boilerplate, Educational Licensing
 **** Update
-- Boilerplate requires additional mockups and ui paradigms as machine learning
-  team is still developing their workflow
+- Ready to move into the actual Nuke application for Ui boilerplate, Educational
+  Licensing for 1 Year has been secured for the whole team
 **** For Next Week
-- Research how the paradigms and mockups described above can be implemented in
-  the Qt UI toolkit
-
+- Basic matte painting node and actual skeleton of UI inside Nuke
 *** Brendan Von Hofe
 **** Last Week
-- Research DeepMask and SharpMask partial solutions
-
+-
 **** Update
 - Discovered newer research paper “Deep Image Matting” that shows very promising results with segmenting (matting) images. (This does not include tracking these objects throughout videos which will be a later stage.) https://arxiv.org/pdf/1703.03872.pdf
 The paper uses a similar encoder-decoder fully convolutional architecture originally specified (a.k.a. UNet).
