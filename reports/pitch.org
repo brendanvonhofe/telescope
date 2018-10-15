@@ -1,6 +1,7 @@
 #+LATEX_HEADER_EXTRA: \usepackage[scaled]{helvet}
 #+LATEX_HEADER_EXTRA: \renewcommand\familydefault{\sfdefault}
 #+LATEX_HEADER_EXTRA: \usepackage[T1]{fontenc}
+#+LATEX_HEADER_EXTRA: \usepackage{tabularx}
 #+LATEX_HEADER_EXTRA: \usepackage[left=2cm, right=2cm,top=2cm]{geometry}
 #+LATEX_CLASS_OPTIONS: [15pt]
 * Telescope
@@ -100,7 +101,6 @@ how the Telescope core can interact with existing artist workflows - but the
 separation of core and plugin is designed such that Telescope can be implemented
 into other software packages like Adobe After Effects or Blackmagic Design
 Fusion at a later date.
-
 | Category                     | What are we using?     |
 |------------------------------+------------------------|
 | Communication                |                        |
@@ -129,14 +129,38 @@ Further iterations of the model will take advantage of the additional informatio
 #+ATTR_LATEX: :width 18cm :center nil
 [[./Dgraph.pdf]]
 #+END_center
+** Plugin UI Mockups
+[[./mockup.png]]
 
 ** Completion Schedule
-| Applications        | Machine Learning                    | Week        |
-|---------------------+-------------------------------------+-------------|
-| TriMap Drawing Node | Recreating Deep Image Matting Paper | 10/14-10/21 |
-|                     | Stress Testing                      | 10/21-10/28 |
-|                     |                                     |             |
-|                     |                                     |             |
+For this semester, we hope to create a working plugin and corresponding ML core
+that allows rotoscoping to be procedureally assisted on a single frame basis.
+This does not mean that it will be impossible to rotoscope a video, just that
+any given frame will not influence the matte of any other frame e.g matte
+interpolation. Matte Interpolation via extending our ML core is our primary goal
+for next semester along with testing and final implementations.
+#+ATTR_LATEX: :environment tabularx :width \textwidth :align XXl
+| Applications                                                                        | Machine Learning                                                                   | Week  |
+|-------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+-------|
+| TriMap Drawing Node                                                                 | Recreating Deep Image Matting Paper                                                | 10/14 |
+|-------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+-------|
+| Investigate Frame By Frame Refinement of TriMap Drawings                            | Continued Implementation, Begin Testing                                            | 10/21 |
+|-------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+-------|
+| Complete UI Skeleton for all Basic Tasks (TriMap Drawing, Selection, Interpolation) | Rigorously evaluate limits of model in realistic setting and research improvements | 10/28 |
+|-------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+-------|
+| Containerize Dependencies for Nuke ML Module Loader                                 | Dataset creation and augmentation improvements                                     | 11/4  |
+|-------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+-------|
+| Begin Developing ML Module Loader                                                   | Experiment with different model architectures                                      | 11/11 |
+|-------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+-------|
+| Integrate ML Module Loader into existing plugin Node                                | Explore new training schedules and perform hyperparameter tuning                   | 11/18 |
+|-------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+-------|
+| Test ML Module Loader on Various Models                                             | Begin research on frame-to-frame interpolation                                     | 11/25 |
+|-------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+-------|
+| Research TriMap Interpolation                                                       | Start implementation                                                               | 12/2  |
+|-------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+-------|
+| Implement Existing Matte to Curves output                                           | Finish implementation                                                              | 12/9  |
+|-------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+-------|
+| Finish up integrations for single frame implementation                              | Evaluate and improve                                                               | 12/6  |
 
 
 * Team
@@ -176,15 +200,11 @@ Further iterations of the model will take advantage of the additional informatio
 - Basic matte painting node and actual skeleton of UI inside Nuke
 *** Brendan Von Hofe
 **** Last Week
--
+- Procure the dataset from Deep Image Matting or being creating one
 **** Update
-- Discovered newer research paper “Deep Image Matting” that shows very promising results with segmenting (matting) images. (This does not include tracking these objects throughout videos which will be a later stage.) https://arxiv.org/pdf/1703.03872.pdf
-The paper uses a similar encoder-decoder fully convolutional architecture originally specified (a.k.a. UNet).
-Differences include a second fully convolutional network that does not downsample or upsample the image, used for refining the image matte.
-They use novel loss functions dubbed the alpha-prediction loss and the compositional loss.
-Alpha-prediction loss is the difference in predicted alpha values at each picture of the image mask (matte) from the ground truth.
-Compositional loss is the difference in RGB values of the predicted composited photo (foreground, background, and alpha mask) and the ground truth composite.
-They also generate a novel dataset by carefully rotoscoping ~500 objects and then compositing them with thousands of images.
+- Gained access to the dataset used in the “Deep Image Matting” paper.
+- Implemented data input pipeline and an encoder-decoder fully convolutional model in Pytorch. The specific flavor of encoder-decoder architecture is known as LinkNet (https://arxiv.org/pdf/1707.03718.pdf).
 **** For Next Week
-Either procure the dataset from the authors of the paper or begin the process of recreating one.
-Implement baseline model.
+- Continue developing deep learning program to recreate “Deep Image Matting”
+  paper.
+  - Specifically, need to implement loss functions, model training schedule, evaluation script and the second (much smaller) convolutional network for matte refinement as described in the paper.
