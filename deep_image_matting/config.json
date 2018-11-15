@@ -1,0 +1,5 @@
+{
+    "batch_size": 16,
+    "pretrained_model": "modelv0_5x.pt",
+    "savename": "modelv0_6.pt"
+}
