@@ -8,6 +8,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
+from tensorboardX import SummaryWriter
 
 from dataset import getTrainValSplit, getTransforms, MatteDataset
 from linknet import LinkNet34
@@ -16,6 +17,7 @@ PATH = Path('/wdblue/deep_image_matting/Combined_Dataset/Training_set')
 BG = PATH/'bg'
 FG = PATH/'fg'
 MASKS = PATH/'mask'
+MODELS = Path('/home/bread/telescope/deep_image_matting/models')
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -26,6 +28,7 @@ def main():
     batch_size = config['batch_size']
     pretrained = config['pretrained_model']
     savename = config['savename']
+    iterations = config['iterations']
 
     train_fns, val_fns = getTrainValSplit(BG)
     data_transform = getTransforms()
@@ -38,17 +41,96 @@ def main():
     dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
 
     telescope = LinkNet34(1)
-    telescope.load_state_dict(torch.load(pretrained))
+    if(len(pretrained)):
+        print("Loading weights from", pretrained)
+        telescope.load_state_dict(torch.load(MODELS/pretrained))
     telescope = telescope.to(device)
 
     criterion = dim_loss_weighted()
-    optimizer_ft = optim.Adam(telescope.parameters(), lr=1e-5)
+    optimizer = optim.Adam(telescope.parameters(), lr=1e-5)
+    model = telescope
 
     print(datetime.now())
-    telescope = train_model(telescope, dataloaders, criterion, optimizer_ft, batch_size, num_epochs=1)
+    since = time.time()
+
+    it = 0
+
+    writer = SummaryWriter('runs/' + savename)
+
+    best_model_wts = copy.deepcopy(model.state_dict())
+    best_loss = 50000
+    
+    num_epochs = int(iterations / 250)
+    for epoch in range(num_epochs):
+        print('Epoch {}/{}'.format(epoch, num_epochs - 1))
+        print('-' * 10)
+
+        # Each epoch has a training and validation phase
+        for phase in ['train', 'val']:
+            if phase == 'train':
+                model.train()  # Set model to training mode
+            else:
+                model.eval()   # Set model to evaluate mode
+
+            running_loss = []
+
+            # Iterate over data.
+            for i, sample in enumerate(dataloaders[phase]):
+                if(phase=='train'):
+                    it += 1
+                if(i != 0 and i % 250 == 0 and phase == 'train'):
+                    break
+                inputs, labels, fg, bg = sample['im_map'], sample['mask'], sample['fg'], sample['bg']
+                inputs = inputs.to(device)
+                labels = labels.to(device)
+                fg = fg.to(device)
+                bg = bg.to(device)
+
+                # zero the parameter gradients
+                optimizer.zero_grad()
+
+                # forward
+                # track history if only in train
+                with torch.set_grad_enabled(phase == 'train'):
+                    outputs = model(inputs)
+                    _, preds = torch.max(outputs, 1)
+                    loss = criterion(outputs, labels, fg, bg, inputs[:,3,:,:])
+                    # loss = criterion(outputs, labels, fg, bg)
+                    running_loss.append(loss.item()/batch_size)
+                    print("Loss at step {}: {}".format(i, loss/batch_size))
+
+                    # backward + optimize only if in training phase
+                    if phase == 'train':
+                        writer.add_scalar('train_loss', loss/batch_size, it)
+                        loss.backward()
+                        optimizer.step()
+
+            epoch_loss = np.array(running_loss).mean()
+            writer.add_scalar(phase + "epoch_loss", epoch_loss, it)
+            
+            print('{} Loss: {:.4f}'.format(
+                phase, epoch_loss))
+
+            # deep copy the model
+            if phase == 'val' and epoch_loss < best_loss:
+                best_loss = epoch_loss
+                best_model_wts = copy.deepcopy(model.state_dict())
+                
+            print("Saving model at", savename)
+            torch.save(model.state_dict(), MODELS/savename)
+
     print(datetime.now())
 
-    torch.save(telescope.state_dict(), savename)
+    time_elapsed = time.time() - since
+    print('Training complete in {:.0f}m {:.0f}s'.format(
+        time_elapsed // 60, time_elapsed % 60))
+    print('Best val Loss: {:4f}'.format(best_loss))
+
+    writer.close()
+    # load best model weights
+    model.load_state_dict(best_model_wts)
+
+    torch.save(telescope.state_dict(), MODELS/savename)
 
 def composite(fg, bg, alpha):
     foreground = torch.mul(alpha, fg)
@@ -67,7 +149,9 @@ def alpha_pred_loss(p_mask, gt_mask, eps=1e-6):
     return torch.sqrt(gt_mask.sub(p_mask).pow(2).sum() + eps)
 
 def alpha_pred_loss_weighted(p_mask, gt_mask, trimap, eps=1e-6):
-    return torch.sqrt(torch.mul(gt_mask.sub(p_mask).pow(2), torch.eq(trimap, torch.FloatTensor(np.ones(gt_mask.shape)*(127./255)).to(device)).float()).sum() + eps)
+    sqr_diff = gt_mask.sub(p_mask).pow(2)
+    unknown = torch.eq(trimap, torch.FloatTensor(np.ones(gt_mask.shape)*(128./255)).to(device)).float()
+    return torch.sqrt(torch.mul(sqr_diff, unknown).sum() + eps)
 
 class temp_loss(_Loss):
     def __init__(self, eps=1e-6):
@@ -86,7 +170,8 @@ def compositional_loss_weighted(p_mask, gt_mask, fg, bg, trimap, eps=1e-6):
     gt_comp = composite(fg, bg, gt_mask)
     p_comp = composite(fg, bg, p_mask)
     bs, h, w = trimap.shape
-    unknown = torch.eq(trimap, torch.FloatTensor(np.ones(trimap.shape)*(127./255)).to(device)).float().expand(3, bs, h, w).contiguous().view(bs,3,h,w)
+    ones = torch.FloatTensor(np.ones(trimap.shape)*(128./255)).to(device)
+    unknown = torch.eq(trimap, ones).float().expand(3, bs, h, w).contiguous().view(bs,3,h,w)
     s_diff = gt_comp.sub(p_comp).pow(2)
     return torch.sqrt(torch.mul(s_diff, unknown).sum() + eps)
     
@@ -97,7 +182,8 @@ class dim_loss(_Loss):
         self.w = w
         
     def forward(self, p_mask, gt_mask, fg, bg):
-        return self.w * alpha_pred_loss(p_mask, gt_mask, self.eps) + (1-self.w) * compositional_loss(p_mask, gt_mask, fg, bg, self.eps)
+        return self.w * alpha_pred_loss(p_mask, gt_mask, self.eps) + \
+               (1-self.w) * compositional_loss(p_mask, gt_mask, fg, bg, self.eps)
     
 class dim_loss_weighted(_Loss):
     def __init__(self, eps=1e-6, w=0.5):
@@ -106,87 +192,8 @@ class dim_loss_weighted(_Loss):
         self.w = w
         
     def forward(self, p_mask, gt_mask, fg, bg, trimap):
-        return self.w * alpha_pred_loss_weighted(p_mask, gt_mask, trimap, self.eps) + (1-self.w) * compositional_loss_weighted(p_mask, gt_mask, fg, bg, trimap, self.eps)
-
-
-def train_model(model, dataloaders, criterion, optimizer, bs, num_epochs=25):
-    since = time.time()
-
-    best_model_wts = copy.deepcopy(model.state_dict())
-    best_loss = 50000
-    
-    loss_records = {'train': [], 'val': [], 'per_batch': []}
-
-    for epoch in range(num_epochs):
-        print('Epoch {}/{}'.format(epoch, num_epochs - 1))
-        print('-' * 10)
-
-        # Each epoch has a training and validation phase
-        for phase in ['train', 'val']:
-            if phase == 'train':
-                model.train()  # Set model to training mode
-            else:
-                model.eval()   # Set model to evaluate mode
-
-            running_loss = 0.0
-#             running_corrects = 0
-
-            # Iterate over data.
-            for i, sample in enumerate(dataloaders[phase]):
-                if(i % 100 == 0):
-                    torch.save(model.state_dict(), "modelv0_5x.pt")
-                inputs, labels, fg, bg = sample['im_map'], sample['mask'], sample['fg'], sample['bg']
-                inputs = inputs.to(device)
-                labels = labels.to(device)
-                fg = fg.to(device)
-                bg = bg.to(device)
-
-                # zero the parameter gradients
-                optimizer.zero_grad()
-
-                # forward
-                # track history if only in train
-                with torch.set_grad_enabled(phase == 'train'):
-                    outputs = model(inputs)
-                    _, preds = torch.max(outputs, 1)
-                    loss = criterion(outputs, labels, fg, bg, inputs[:,3,:,:])
-#                     loss = criterion(outputs, labels)
-                    loss_records['per_batch'].append(loss/bs)
-                    print("Loss at step {}: {}".format(i, loss/bs))
-
-                    # backward + optimize only if in training phase
-                    if phase == 'train':
-                        loss.backward()
-                        optimizer.step()
-
-                # statistics
-                running_loss += loss.item() * inputs.size(0)
-#                 running_corrects += torch.sum(preds == labels.data)
-
-            epoch_loss = running_loss / dataset_sizes[phase]
-#             epoch_acc = running_corrects.double() / dataset_sizes[phase]
-            
-            loss_records[phase].append(epoch_loss)
-            print('{} Loss: {:.4f}'.format(
-                phase, epoch_loss))
-
-            # deep copy the model
-            if phase == 'val' and epoch_loss < best_loss:
-                best_loss = epoch_loss
-                best_model_wts = copy.deepcopy(model.state_dict())
-                
-            torch.save(model.state_dict(), "modelv0_5x.pt")
-
-        print()
-
-    time_elapsed = time.time() - since
-    print('Training complete in {:.0f}m {:.0f}s'.format(
-        time_elapsed // 60, time_elapsed % 60))
-    print('Best val Loss: {:4f}'.format(best_loss))
-
-    # load best model weights
-    model.load_state_dict(best_model_wts)
-    return model, loss_records
+        return self.w * alpha_pred_loss_weighted(p_mask, gt_mask, trimap, self.eps) + \
+               (1-self.w) * compositional_loss_weighted(p_mask, gt_mask, fg, bg, trimap, self.eps)
 
 if __name__ == "__main__":
     main()
