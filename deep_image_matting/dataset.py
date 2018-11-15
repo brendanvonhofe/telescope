@@ -23,53 +23,64 @@ class MatteDataset(Dataset):
         
     def mapto255(self, x):
         if(x > 0):
-            return 255
+            return 255.
         else:
-            return 0
+            return 0.
         
     def mapto255_2(self, x):
         if(x > 191):
-            return 255
+            return 255.
         else:
-            return 0
+            return 0.
     
     def __getitem__(self, idx):
-        fn = self.fgs[np.random.randint(0, len(self.fgs))]
+        # Read in foreground, background and alpha mask for foreground
+        fn = self.fgs[np.random.randint(0, len(self.fgs))] # Random foreground
         fg = io.imread(self.fg_path/fn)
         mask = io.imread(self.root_dir/'mask'/fn)
         bg = io.imread(self.root_dir/'bg'/self.fns[idx])
-                    
+        
+        # Resize to fit be same as background
         bg = bg.astype(np.float64)
         fg = cv2.resize(fg, (bg.shape[1], bg.shape[0])).astype(np.float64)
         mask = cv2.resize(mask, (bg.shape[1], bg.shape[0])).astype(np.uint8)
         
+        # Composite image
         alpha = np.array([mask/255]*3).transpose(1,2,0).astype(np.float64)
         foreground = np.multiply(alpha, fg)
         background = np.multiply(1.0 - alpha, bg)
         image = cv2.add(foreground, background).astype(np.uint8)
                 
-        kernel = np.ones((np.random.randint(20, 40), np.random.randint(20, 40)), np.uint8)
-        trimap = ((0.5 * morphology.dilation(self.vmap1(mask), kernel))+\
-                  (0.5 * morphology.erosion(self.vmap2(mask), kernel))).astype(np.uint8)
-        trimap = np.expand_dims(trimap, -1)
-
+        # Create trimap from mask by randomly dilating
         if(len(mask.shape) == 2):
             mask = np.expand_dims(mask, -1)
-            
-        h, w = image.shape[0], image.shape[1]
-        if(h < 330 or w < 330):
-            pad = [330-h, 330-w]
-            if(pad[0] < 0):
-                pad[0] = 0
-            if(pad[1] < 0):
-                pad[1] = 0
-            h, w = h + pad[0], w + pad[1]
-            pad = [(0, pad[0]), (0, pad[1]), (0, 0)]
-            image = util.pad(image, pad, mode='reflect')
-            trimap = util.pad(trimap, pad, mode='reflect')
-            mask = util.pad(mask, pad, mode='reflect')
-            fg = util.pad(fg, pad, mode='reflect')
-            bg = util.pad(bg, pad, mode='reflect')
+        kernel = np.ones((np.random.randint(20, 40), np.random.randint(20, 40)), np.uint8)
+        trimap = np.copy(mask)
+        trimap[np.where((cv2.dilate(trimap[:,:,0], kernel=kernel) - \
+                     cv2.erode(trimap[:,:,0],kernel=kernel))!=0)] = 128
+        
+        # Pad images 
+        if(image.shape[0] < 333 or image.shape[1] < 333):
+            image = cv2.resize(image, (333, 333))
+            trimap = np.expand_dims(cv2.resize(trimap, (333, 333)), -1)
+            mask = np.expand_dims(cv2.resize(mask, (333, 333)), -1)
+            fg = cv2.resize(fg, (333, 333))
+            bg = cv2.resize(bg, (333, 333))
+
+        # h, w = image.shape[0], image.shape[1]
+        # if(h < 330 or w < 330):
+        #     pad = [330-h, 330-w]
+        #     if(pad[0] < 0):
+        #         pad[0] = 0
+        #     if(pad[1] < 0):
+        #         pad[1] = 0
+        #     h, w = h + pad[0], w + pad[1]
+        #     pad = [(0, pad[0]), (0, pad[1]), (0, 0)]
+        #     image = util.pad(image, pad, mode='reflect')
+        #     trimap = util.pad(trimap, pad, mode='reflect')
+        #     mask = util.pad(mask, pad, mode='reflect')
+        #     fg = util.pad(fg, pad, mode='reflect')
+        #     bg = util.pad(bg, pad, mode='reflect')
 
         im_map = np.concatenate((image, trimap), axis=2)
         im_map = np.multiply(im_map, (1/255))
@@ -142,8 +153,8 @@ class ToTensor(object):
 
 def getTrainValSplit(path):
     fns = np.array(os.listdir(path))
-    val_idxs = [i for i in range(0,int(len(fns)/10))]
-    val_fns = fns[:int(len(fns)/10)]
+    val_idxs = [i for i in range(0,int(len(fns)/80))]
+    val_fns = fns[:int(len(fns)/80)]
     train_idxs = list(set([i for i in range(0,len(fns))]).difference(set(val_idxs)))
     train_fns = fns[train_idxs]
     return train_fns, val_fns
