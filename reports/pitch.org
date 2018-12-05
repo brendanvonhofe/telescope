@@ -5,7 +5,10 @@
 #+LATEX_HEADER_EXTRA: \usepackage[left=2cm, right=2cm,top=2cm]{geometry}
 #+LATEX_CLASS_OPTIONS: [15pt]
 * Telescope
-Kevin Poli, Phil Vitale, Connor O'Hara and Brendan Von Hofe
+- Connor O’Hara: Image Processing (cohara1@stevens.edu)
+- Kevin Poli: Application/ Artist Tools Developer (kpoli@stevens.edu)
+- Philip Vitale: Application & Systems Developer (pvitale@stevens.edu)
+- Brendan von Hofe: Machine Learning (bvonhofe@stevens.edu)
 ** Advisors:
 Hong Man (hman@stevens.edu), Jeff Thompson (JThomps4@stevens.edu)
 * Intro
@@ -131,7 +134,19 @@ Further iterations of the model will take advantage of the additional informatio
 #+END_center
 ** Plugin UI Mockups
 [[./mockup.png]]
+** Deep Learning Core
 
+[[attach:image1_20181114_122910.png]]
+The core of our rotoscoping program is the deep learning model that takes the image to be cropped and an associated trimap as input (the two leftmost frames respectively), and outputs the cropped portion (rightmost frame). The image to be cropped can be of anything the user wishes. The associated trimap is used to identify the subject (foreground) in the image that the users wishes to crop out. It is drawn with auxiliary tools of our software to identify the definite foreground in white, the unsure foreground (e.g. hair) in grey, and definite background in black. The output is an alpha matte that can be used to crop the subject out of the original image.
+
+
+[[attach:image2_20181114_123001.png]]
+ The deep learning core is defined by the architecture (type of neural network) and its training process. The architecture is composed of two convolutional neural networks. The input data first passes through an encoder-decoder style network, commonly used for segmentation tasks (in the image above, the encoder is the first half of the ‘U’ and the decoder is the second half). Through the successive steps of the network, the image is transformed into different representations called feature maps. The initial representation is the input image itself along with the trimap. As a multidimensional array it has a shape of [height, width, channels]. In this case, there are 4 channels. Three are the RGB channels of the input image, and the last is the associated trimap. As the image passes through the encoder, the feature map representing the image becomes shorter and thinner, but much deeper (e.g. shape of [7, 7, 2048]. The receptive field[1] of the convolutions grows, theoretically allowing it to make higher level abstractions about the subject matter of the image. The decoder then uses this information to eventually generate a single channel image with the same height and width of the original as it uses transposed convolutions.
+        The second convolutional neural network is much simpler, composed of only a couple convolutional layers similar to the first of the encoder’s. The input to this network is the original image along with the alpha matte produced from the first network. It outputs a refined version of the alpha matte.
+        The training process involves feeding the networks images that we also have ground truth alpha mattes for. After the network outputs a prediction for the alpha matte, we compare it with the ground truth alpha matte using a loss function. This loss function is a combination of two loss functions, the alpha prediction loss, and the compositional loss. The former simply calculates the pixel-wise squared error between mattes. The latter does the same calculation but with the original RGB image composited with the ground truth and predicted alpha mattes. Because of the differentiable nature of the loss functions and backpropagation[2], the weights of the neural network are able to be updated to perform the associated task of rotoscoping slightly better after training on each image. We repeatedly train on the entire dataset until improvements become negligible.
+*** More Information
+- https://medium.com/mlreview/a-guide-to-receptive-field-arithmetic-for-convolutional-neural-networks-e0f514068807
+- https://medium.com/datathings/neural-networks-and-backpropagation-explained-in-a-simple-way-f540a3611f5e
 ** Completion Schedule
 For this semester, we hope to create a working plugin and corresponding ML core
 that allows rotoscoping to be procedureally assisted on a single frame basis.
@@ -140,27 +155,27 @@ any given frame will not influence the matte of any other frame e.g matte
 interpolation. Matte Interpolation via extending our ML core is our primary goal
 for next semester along with testing and final implementations.
 #+ATTR_LATEX: :environment tabularx :width \textwidth :align XXl
-| Applications                                                                        | Machine Learning                                                                   | Week  |
-|-------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+-------|
-| TriMap Drawing Node                                                                 | Recreating Deep Image Matting Paper                                                | 10/14 |
-|-------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+-------|
-| Investigate Frame By Frame Refinement of TriMap Drawings                            | Continued Implementation, Begin Testing                                            | 10/21 |
-|-------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+-------|
-| Complete UI Skeleton for all Basic Tasks (TriMap Drawing, Selection, Interpolation) | Rigorously evaluate limits of model in realistic setting and research improvements | 10/28 |
-|-------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+-------|
-| Containerize Dependencies for Nuke ML Module Loader                                 | Dataset creation and augmentation improvements                                     | 11/4  |
-|-------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+-------|
-| Begin Developing ML Module Loader                                                   | Experiment with different model architectures                                      | 11/11 |
-|-------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+-------|
-| Integrate ML Module Loader into existing plugin Node                                | Explore new training schedules and perform hyperparameter tuning                   | 11/18 |
-|-------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+-------|
-| Test ML Module Loader on Various Models                                             | Begin research on frame-to-frame interpolation                                     | 11/25 |
-|-------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+-------|
-| Research TriMap Interpolation                                                       | Start implementation                                                               | 12/2  |
-|-------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+-------|
-| Implement Existing Matte to Curves output                                           | Finish implementation                                                              | 12/9  |
-|-------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+-------|
-| Finish up integrations for single frame implementation                              | Evaluate and improve                                                               | 12/6  |
+| Applications                                                                          | Machine Learning                                                                    | Week  |
+|---------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+-------|
+| +TriMap Drawing Node+                                                                 | +Recreating Deep Image Matting Paper+                                               | 10/14 |
+|---------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+-------|
+| +Investigate Frame By Frame Refinement of TriMap Drawings+                            | +Continued Implementation, Begin Testing+                                           | 10/21 |
+|---------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+-------|
+| +Complete UI Skeleton for all Basic Tasks (TriMap Drawing, Selection, Interpolation)+ | +Rigorously evaluate limits of model in realistic setting and research improvements+ | 10/28 |
+|---------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+-------|
+| +Containerize Dependencies for Nuke ML Module Loader+                                 | +Dataset creation and augmentation improvements+                                    | 11/4  |
+|---------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+-------|
+| +Begin Developing ML Module Loader+                                                   | +Experiment with different model architectures+                                     | 11/11 |
+|---------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+-------|
+| +Integrate ML Module Loader into existing plugin Node+                                | Explore new training schedules and perform hyperparameter tuning                    | 11/18 |
+|---------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+-------|
+| Test ML Module Loader on Various Models                                               | Begin research on frame-to-frame interpolation                                      | 11/25 |
+|---------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+-------|
+| Research TriMap Interpolation                                                         | Start implementation                                                                | 12/2  |
+|---------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+-------|
+| Implement Existing Matte to Curves output                                             | Finish implementation                                                               | 12/9  |
+|---------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+-------|
+| Finish up integrations for single frame implementation                                | Evaluate and improve                                                                | 12/6  |
 
 
 * Team
@@ -176,35 +191,35 @@ for next semester along with testing and final implementations.
 
 *** Connor O’Hara
 **** Last Week
-- Generative Ladder Networks deemed probably too bleeding edge to adopt, moved
-  on to other tasks
+- New, representative and noncyclical dependency graph
 **** Update
-- Research into single channel matte to bezier curves has panned out
+- Replaced in its original section
 **** For Next week
-- Stress test mattes -> curves, begin familiarity with PyTorch
+- Research into adapting Matte to Curves for comples mattes like hair or semitransparency
+
 *** Kevin Poli
 **** Last Week
-- UI paradigm mockups
+- Resuming work in Nuke, and exploring API for novel interactions
 **** Update
-- see included mockup of multi matte browsing in one node
+- Looking to complete TriMap drawing node with support for edge dialations, masks etc.
 **** For Next Week
-- UI paradigm and mockup for drawing and frame by frame editing TriMap garbage
-  mattes
+- Functional 1-channel 3 color drawing node for TriMaps
 *** Phil Vitale
 **** Last Week
-- UI boilerplate, Educational Licensing
+- work will be split into TriMap drawing and module loader nodes
 **** Update
-- Ready to move into the actual Nuke application for Ui boilerplate, Educational
-  Licensing for 1 Year has been secured for the whole team
+- work has began on the ML module loader
 **** For Next Week
-- Basic matte painting node and actual skeleton of UI inside Nuke
+ - rough draft of the module loader, may be as simple as shellscript/watch folders
 *** Brendan Von Hofe
 **** Last Week
-- Procure the dataset from Deep Image Matting or being creating one
+Utilizing dilation and erosion algorithms to automatically generate trimaps from
+image mattes. See attached image of dialated trimap
+
+[[attach:1133x794_20181105_130958.png]]
 **** Update
-- Gained access to the dataset used in the “Deep Image Matting” paper.
-- Implemented data input pipeline and an encoder-decoder fully convolutional model in Pytorch. The specific flavor of encoder-decoder architecture is known as LinkNet (https://arxiv.org/pdf/1707.03718.pdf).
+- We have begun training the model, initial results even at low training times
+  are looking good. A high level explaination of our techniques has been
+  included above.
 **** For Next Week
-- Continue developing deep learning program to recreate “Deep Image Matting”
-  paper.
-  - Specifically, need to implement loss functions, model training schedule, evaluation script and the second (much smaller) convolutional network for matte refinement as described in the paper.
+- continue iterating on the model, and explore options for further fine tuning
