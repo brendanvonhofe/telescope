@@ -1,4 +1,4 @@
-% Created 2018-11-27 Tue 15:31
+% Created 2019-02-05 Tue 21:37
 % Intended LaTeX compiler: pdflatex
 \documentclass[15pt]{article}
 \usepackage[utf8]{inputenc}
@@ -34,7 +34,7 @@
 \tableofcontents
 
 \section{Telescope}
-\label{sec:org6e4eb81}
+\label{sec:org8502284}
 \begin{itemize}
 \item Connor O’Hara: Image Processing (cohara1@stevens.edu)
 \item Kevin Poli: Application/ Artist Tools Developer (kpoli@stevens.edu)
@@ -42,10 +42,10 @@
 \item Brendan von Hofe: Machine Learning (bvonhofe@stevens.edu)
 \end{itemize}
 \subsection{Advisors:}
-\label{sec:org32de14d}
+\label{sec:org24d7522}
 Hong Man (hman@stevens.edu), Jeff Thompson (JThomps4@stevens.edu)
 \section{Intro}
-\label{sec:org7d4721a}
+\label{sec:org1c8349e}
 Telescope is a machine learning assisted toolkit for digital video compositors
 with applications in visual effects, matte painting and diverse use cases
 accross the video post production pipeline. Tools from existing compositing
@@ -62,7 +62,7 @@ is in the process of revolutionizing image processing, and that user driven
 toolkits rather than black box command line workflows will bring our intelligent
 core into the hands of the artists where they can thrive.
 \subsection{Demonstration}
-\label{sec:org13c8a54}
+\label{sec:org5d45776}
 Rotoscoping is the process of frame by frame selecting and isolating a given feature (usually
 an object or person) in a video, such that you can produce a video clip of
 exclusively that selection on a transparent background
@@ -106,7 +106,7 @@ selected before
 \end{itemize}
 \end{itemize}
 \subsubsection{Frame By Frame}
-\label{sec:orga0d5090}
+\label{sec:org669636b}
 Much of the challenge and tedium of rotoscoping comes from repeating the above
 process for every frame, traditionally, artists will go frame by frame through
 the video and manually adjust their selections to match the feature they are
@@ -122,7 +122,7 @@ this gif that displays the matte on the left, with the source on the right, and
 has selection lines on both
 \url{https://www.google.com/url?sa=i\&rct=j\&q=\&esrc=s\&source=images\&cd=\&cad=rja\&uact=8\&ved=2ahUKEwj4poGei\_bdAhVvTt8KHYSXBs0QjRx6BAgBEAU\&url=https\%3A\%2F\%2Ftaukeke.com\%2F2014\%2F07\%2Frotoscoping-in-nuke\%2F\&psig=AOvVaw0rzB0nhBNxm\_0WD1VdybtL\&ust=1539062086451365}
 \subsubsection{Use Cases}
-\label{sec:org5fbe941}
+\label{sec:org9270459}
 With our selection isolated, we can start to play with the image accordingly
 
 By layering the source footage and our rotoscoped hand and face, we can apply an
@@ -133,7 +133,7 @@ effect, like the 'colorama' effect to only the pixels we roto'd previously
 \end{center}
 \begin{enumerate}
 \item Compositing
-\label{sec:orgb1ac4f8}
+\label{sec:org0adb506}
 The most popular use case for rotoscoping is Compositing, which is the process
 of combining multiple images into one. Consider three layers to see how this is
 done.
@@ -160,9 +160,9 @@ and here is the desired effect
 \end{center}
 \end{enumerate}
 \section{Technical Plan}
-\label{sec:org333c036}
+\label{sec:org7b86088}
 \subsection{Components}
-\label{sec:org2e9d543}
+\label{sec:orge132fb6}
 Telescope as a product will consist of two primary modules, the Telescope Core,
 which is a machine learning core assisted by traditional algorithmics that
 implements the novel functionality of Telescope, and an exchange plugin that
@@ -193,7 +193,7 @@ Packages & PyTorch\\
 \end{tabular}
 \end{center}
 \subsection{Algorithmics}
-\label{sec:orgb1024e3}
+\label{sec:org051187b}
 
 The algorithmic core of our plugin will take images (frames of videos) as input and output segmentation masks (mattes) as output. The goal of the masks is to identify all the discrete objects in the image. It is class-agnostic and therefore does not need to determine what the objects are (e.g. cat or dog) but rather the fact that they are discrete.
 Our criteria for determining how well our model is accomplishing the task is the Intersection-over-Union metric (IoU). We have yet to determine what an acceptable IoU score is for industry applications.
@@ -201,17 +201,17 @@ The model will be a convolutional neural network. Specifically, we will begin wi
 Further iterations of the model will take advantage of the additional information in EXR images to refine object mattes and the DAVIS video object segmentation dataset.
 
 \subsection{Dependency Model}
-\label{sec:org64e5d9f}
+\label{sec:orgfdc0da0}
 \begin{center}
 \includegraphics[width=18cm]{./Dgraph.pdf}
 \end{center}
 \subsection{Plugin UI Mockups}
-\label{sec:org748a618}
+\label{sec:org1d58d76}
 \begin{center}
 \includegraphics[width=.9\linewidth]{./mockup.png}
 \end{center}
 \subsection{Deep Learning Core}
-\label{sec:org402ee43}
+\label{sec:org22f488d}
 
 \begin{center}
 \includegraphics[width=.9\linewidth]{/Users/kevinpoli/org/.attach/image1_20181114_122910.png}
@@ -226,50 +226,49 @@ The core of our rotoscoping program is the deep learning model that takes the im
         The second convolutional neural network is much simpler, composed of only a couple convolutional layers similar to the first of the encoder’s. The input to this network is the original image along with the alpha matte produced from the first network. It outputs a refined version of the alpha matte.
         The training process involves feeding the networks images that we also have ground truth alpha mattes for. After the network outputs a prediction for the alpha matte, we compare it with the ground truth alpha matte using a loss function. This loss function is a combination of two loss functions, the alpha prediction loss, and the compositional loss. The former simply calculates the pixel-wise squared error between mattes. The latter does the same calculation but with the original RGB image composited with the ground truth and predicted alpha mattes. Because of the differentiable nature of the loss functions and backpropagation[2], the weights of the neural network are able to be updated to perform the associated task of rotoscoping slightly better after training on each image. We repeatedly train on the entire dataset until improvements become negligible.
 \subsubsection{More Information}
-\label{sec:org2c47e66}
+\label{sec:orgec15ae9}
 \begin{itemize}
 \item \url{https://medium.com/mlreview/a-guide-to-receptive-field-arithmetic-for-convolutional-neural-networks-e0f514068807}
 \item \url{https://medium.com/datathings/neural-networks-and-backpropagation-explained-in-a-simple-way-f540a3611f5e}
 \end{itemize}
 \subsection{Completion Schedule}
-\label{sec:orgaaa3358}
-For this semester, we hope to create a working plugin and corresponding ML core
-that allows rotoscoping to be procedureally assisted on a single frame basis.
-This does not mean that it will be impossible to rotoscope a video, just that
-any given frame will not influence the matte of any other frame e.g matte
-interpolation. Matte Interpolation via extending our ML core is our primary goal
-for next semester along with testing and final implementations.
+\label{sec:org6a6e700}
+As the models have taken to exceptionally long training times, we have pivoted
+slightly to the goal of having single frame at a time calculated at every frame
+via the plugin utilizing the ML core. This is in contrast to our previous goal
+which would use motion within the image as part of the ML core. These features
+may still come to the plugin, but it is likely that they will arrive as
+traditionally algorithmic and not ML based features, as there are already algorithmic techniques for
+making mattes and trimaps more consistent across frames.
 \begin{center}
 \begin{tabularx}{\textwidth}{XXl}
 Applications & Machine Learning & Week\\
 \hline
-\sout{TriMap Drawing Node} & \sout{Recreating Deep Image Matting Paper} & 10/14\\
+\sout{Integrate ML Module Loader into existing plugin Node} & Explore new training schedules and perform hyperparameter tuning & 4\\
 \hline
-\sout{Investigate Frame By Frame Refinement of TriMap Drawings} & \sout{Continued Implementation, Begin Testing} & 10/21\\
+Test ML Module Loader on Various Models & Continued refinement on the single frame model & 5\\
 \hline
-\sout{Complete UI Skeleton for all Basic Tasks (TriMap Drawing, Selection, Interpolation)} & \sout{Rigorously evaluate limits of model in realistic setting and research improvements} & 10/28\\
+Research Image Interpolation & Research into multi-resolution support & 6\\
 \hline
-\sout{Containerize Dependencies for Nuke ML Module Loader} & \sout{Dataset creation and augmentation improvements} & 11/4\\
+Test interpolations & continued research into resolution independence & 7\\
 \hline
-\sout{Begin Developing ML Module Loader} & \sout{Experiment with different model architectures} & 11/11\\
+Begin integrating interpolation tools & Begin implementing resolution independence & 8\\
 \hline
-\sout{Integrate ML Module Loader into existing plugin Node} & Explore new training schedules and perform hyperparameter tuning & 11/18\\
+Refine interpolation tools & Research ML based frame Interpolation & 9\\
 \hline
-Test ML Module Loader on Various Models & Begin research on frame-to-frame interpolation & 11/25\\
+Research any additional artist tools required & Research additional ML artist tools & 10\\
 \hline
-Research TriMap Interpolation & Start implementation & 12/2\\
+implement additional convenience tools if necessary & implement ML frame interpolation and tools if necessary & 11\\
 \hline
-Implement Existing Matte to Curves output & Finish implementation & 12/9\\
-\hline
-Finish up integrations for single frame implementation & Evaluate and improve & 12/6\\
+continued refinement & continued refinement & 12\\
 \end{tabularx}
 \end{center}
 
 
 \section{Team}
-\label{sec:org3f3ce63}
+\label{sec:org9a20625}
 \subsection{Roles}
-\label{sec:org47ffda7}
+\label{sec:org69d7b8f}
 \begin{itemize}
 \item Connor O’Hara: Image Processing (cohara1@stevens.edu)
 \item Kevin Poli: Application/ Artist Tools Developer (kpoli@stevens.edu)
@@ -280,71 +279,71 @@ Finish up integrations for single frame implementation & Evaluate and improve & 
 
 
 \subsection{Delegation of Tasks}
-\label{sec:orgb479d3c}
+\label{sec:org65bd09b}
 
 \subsubsection{Connor O’Hara}
-\label{sec:orgcdacdb3}
+\label{sec:org6158cc1}
 \begin{enumerate}
 \item Last Week
-\label{sec:orgaabd651}
+\label{sec:org54492d6}
 \begin{itemize}
-\item New, representative and noncyclical dependency graph
+\item research into adapting matte to curves
 \end{itemize}
 \item Update
-\label{sec:org6e4ffc4}
+\label{sec:org5906e47}
 \begin{itemize}
-\item Replaced in its original section
+\item still unsure about curve-ifying complex mattes with transparency
 \end{itemize}
 \item For Next week
-\label{sec:org3b35c22}
+\label{sec:org0adf186}
 \begin{itemize}
-\item Research into adapting Matte to Curves for comples mattes like hair or semitransparency
+\item Research potential alternatives for cleaning up an auto-roto'd shot
 \end{itemize}
 \end{enumerate}
 
 \subsubsection{Kevin Poli}
-\label{sec:orgb78b303}
+\label{sec:org3f240e7}
 \begin{enumerate}
 \item Last Week
-\label{sec:org452a592}
+\label{sec:org4b0abf7}
 \begin{itemize}
 \item Resuming work in Nuke, and exploring API for novel interactions
 \end{itemize}
 \item Update
-\label{sec:orge3e3cc8}
+\label{sec:orgf44ce66}
 \begin{itemize}
 \item Looking to complete TriMap drawing node with support for edge dialations, masks etc.
 \end{itemize}
 \item For Next Week
-\label{sec:org2339e56}
+\label{sec:orgb6ac926}
 \begin{itemize}
 \item Functional 1-channel 3 color drawing node for TriMaps
 \end{itemize}
 \end{enumerate}
 \subsubsection{Phil Vitale}
-\label{sec:org22a2b59}
+\label{sec:org058af40}
 \begin{enumerate}
 \item Last Week
-\label{sec:orgf06e107}
+\label{sec:org17c4624}
 \begin{itemize}
 \item work will be split into TriMap drawing and module loader nodes
 \end{itemize}
 \item Update
-\label{sec:orgae70728}
+\label{sec:orgc627a1a}
 \begin{itemize}
 \item work has began on the ML module loader
 \end{itemize}
 \item For Next Week
-\label{sec:org6c4ddc0}
+\label{sec:orgcb10d61}
 \begin{itemize}
 \item rough draft of the module loader, may be as simple as shellscript/watch folders
 \end{itemize}
 \end{enumerate}
 \subsubsection{Brendan Von Hofe}
-\label{sec:orgc9a3b65}
+\label{sec:org4a64ff4}
 \begin{enumerate}
 \item Last Week
-\label{sec:orgc212c7f}
+\label{sec:org399d8a6}
 Utilizing dilation and erosion algorithms to automatically generate trimaps from
 image mattes. See attached image of dialated trimap
 
@@ -352,14 +351,14 @@ image mattes. See attached image of dialated trimap
 \includegraphics[width=.9\linewidth]{/Users/kevinpoli/org/.attach/1133x794_20181105_130958.png}
 \end{center}
 \item Update
-\label{sec:orgf5b0dd7}
+\label{sec:orgcfc0503}
 \begin{itemize}
 \item We have begun training the model, initial results even at low training times
 are looking good. A high level explaination of our techniques has been
 included above.
 \end{itemize}
 \item For Next Week
-\label{sec:orgf512713}
+\label{sec:org6508a78}
 \begin{itemize}
 \item continue iterating on the model, and explore options for further fine tuning
 \end{itemize}

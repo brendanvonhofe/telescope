@@ -148,34 +148,33 @@ The core of our rotoscoping program is the deep learning model that takes the im
 - https://medium.com/mlreview/a-guide-to-receptive-field-arithmetic-for-convolutional-neural-networks-e0f514068807
 - https://medium.com/datathings/neural-networks-and-backpropagation-explained-in-a-simple-way-f540a3611f5e
 ** Completion Schedule
-For this semester, we hope to create a working plugin and corresponding ML core
-that allows rotoscoping to be procedureally assisted on a single frame basis.
-This does not mean that it will be impossible to rotoscope a video, just that
-any given frame will not influence the matte of any other frame e.g matte
-interpolation. Matte Interpolation via extending our ML core is our primary goal
-for next semester along with testing and final implementations.
+As the models have taken to exceptionally long training times, we have pivoted
+slightly to the goal of having single frame at a time calculated at every frame
+via the plugin utilizing the ML core. This is in contrast to our previous goal
+which would use motion within the image as part of the ML core. These features
+may still come to the plugin, but it is likely that they will arrive as
+traditionally algorithmic and not ML based features, as there are already algorithmic techniques for
+making mattes and trimaps more consistent across frames.
 #+ATTR_LATEX: :environment tabularx :width \textwidth :align XXl
-| Applications                                                                          | Machine Learning                                                                    | Week  |
-|---------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+-------|
-| +TriMap Drawing Node+                                                                 | +Recreating Deep Image Matting Paper+                                               | 10/14 |
-|---------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+-------|
-| +Investigate Frame By Frame Refinement of TriMap Drawings+                            | +Continued Implementation, Begin Testing+                                           | 10/21 |
-|---------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+-------|
-| +Complete UI Skeleton for all Basic Tasks (TriMap Drawing, Selection, Interpolation)+ | +Rigorously evaluate limits of model in realistic setting and research improvements+ | 10/28 |
-|---------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+-------|
-| +Containerize Dependencies for Nuke ML Module Loader+                                 | +Dataset creation and augmentation improvements+                                    | 11/4  |
-|---------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+-------|
-| +Begin Developing ML Module Loader+                                                   | +Experiment with different model architectures+                                     | 11/11 |
-|---------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+-------|
-| +Integrate ML Module Loader into existing plugin Node+                                | Explore new training schedules and perform hyperparameter tuning                    | 11/18 |
-|---------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+-------|
-| Test ML Module Loader on Various Models                                               | Begin research on frame-to-frame interpolation                                      | 11/25 |
-|---------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+-------|
-| Research TriMap Interpolation                                                         | Start implementation                                                                | 12/2  |
-|---------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+-------|
-| Implement Existing Matte to Curves output                                             | Finish implementation                                                               | 12/9  |
-|---------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+-------|
-| Finish up integrations for single frame implementation                                | Evaluate and improve                                                                | 12/6  |
+| Applications                                           | Machine Learning                                                 | Week |
+|--------------------------------------------------------+------------------------------------------------------------------+------|
+| +Integrate ML Module Loader into existing plugin Node+ | Explore new training schedules and perform hyperparameter tuning |    4 |
+|--------------------------------------------------------+------------------------------------------------------------------+------|
+| Test ML Module Loader on Various Models                | Continued refinement on the single frame model                   |    5 |
+|--------------------------------------------------------+------------------------------------------------------------------+------|
+| Research Image Interpolation                           | Research into multi-resolution support                           |    6 |
+|--------------------------------------------------------+------------------------------------------------------------------+------|
+| Test interpolations                                    | continued research into resolution independence                  |    7 |
+|--------------------------------------------------------+------------------------------------------------------------------+------|
+| Begin integrating interpolation tools                  | Begin implementing resolution independence                       |    8 |
+|--------------------------------------------------------+------------------------------------------------------------------+------|
+| Refine interpolation tools                             | Research ML based frame Interpolation                            |    9 |
+|--------------------------------------------------------+------------------------------------------------------------------+------|
+| Research any additional artist tools required          | Research additional ML artist tools                              |   10 |
+|--------------------------------------------------------+------------------------------------------------------------------+------|
+| implement additional convenience tools if necessary    | implement ML frame interpolation and tools if necessary          |   11 |
+|--------------------------------------------------------+------------------------------------------------------------------+------|
+| continued refinement                                   | continued refinement                                             |   12 |
 
 
 * Team
@@ -191,11 +190,11 @@ for next semester along with testing and final implementations.
 
 *** Connor O’Hara
 **** Last Week
-- New, representative and noncyclical dependency graph
+- research into adapting matte to curves
 **** Update
-- Replaced in its original section
+- still unsure about curve-ifying complex mattes with transparency
 **** For Next week
-- Research into adapting Matte to Curves for comples mattes like hair or semitransparency
+- Research potential alternatives for cleaning up an auto-roto'd shot
 
 *** Kevin Poli
 **** Last Week
