@@ -5,6 +5,7 @@
 # InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin
 # End Compiler Info Output
 CXX ?= clang++
+C ?= clang
 LINK ?= clang++
 NDKDIR ?= /Applications/Nuke11.2v4/Nuke11.2v4.app/Contents/MacOS
 #You will need to set the path to boost for psdReader only
@@ -14,7 +15,7 @@ OPENEXRDIR ?= REPLACE_ME_WITH_OPENEXR_DIR
 CXXFLAGS ?= -g -c \
             -DUSE_GLEW \
             -I$(NDKDIR)/include \
-            -F../../../Nuke11.2v4.app/Contents/Frameworks \
+            -F/Applications/Nuke11.2v4/Nuke11.2v4.app/Contents/Frameworks \
             -DFN_EXAMPLE_PLUGIN 
 LINKFLAGS ?= -L$(NDKDIR) \
              -L./ 
@@ -27,7 +28,8 @@ FRAMEWORKS ?= -framework QuartzCore \
               -framework ApplicationServices \
               -framework OpenGL \
               -framework AGL 
-all: ndkexists TriMapShift.dylib
+all: ndkexists TriMapShift.dylib \
+			FastTriMapErode.dylib
 
 exrPlugins: openEXRexists exrReader.so exrWriter.so
 
@@ -105,6 +107,10 @@ boostexists:
 .PRECIOUS : %.os
 %.os: %.cpp
 	$(CXX) $(CXXFLAGS) -o $(@) $<
+%.os: %.c
+	$(CXX) $(CXXFLAGS) -o $(@) $<
+%.a: %.c
+	$(CXX) $(CXXFLAGS) -o lib$(@) $<
 %.dylib: %.os
 	$(LINK) $(LINKFLAGS) $(LIBS) $(FRAMEWORKS) -o $(@) $<
 %.a: %.cpp
