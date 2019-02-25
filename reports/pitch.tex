@@ -1,4 +1,4 @@
-% Created 2019-02-05 Tue 21:37
+% Created 2019-02-21 Thu 10:12
 % Intended LaTeX compiler: pdflatex
 \documentclass[15pt]{article}
 \usepackage[utf8]{inputenc}
@@ -14,6 +14,7 @@
 \usepackage{amssymb}
 \usepackage{capt-of}
 \usepackage{hyperref}
+\usepackage{minted}
 \usepackage[scaled]{helvet}
 \renewcommand\familydefault{\sfdefault}
 \usepackage[T1]{fontenc}
@@ -34,7 +35,7 @@
 \tableofcontents
 
 \section{Telescope}
-\label{sec:org8502284}
+\label{sec:org8762791}
 \begin{itemize}
 \item Connor O’Hara: Image Processing (cohara1@stevens.edu)
 \item Kevin Poli: Application/ Artist Tools Developer (kpoli@stevens.edu)
@@ -42,10 +43,10 @@
 \item Brendan von Hofe: Machine Learning (bvonhofe@stevens.edu)
 \end{itemize}
 \subsection{Advisors:}
-\label{sec:org24d7522}
+\label{sec:org9f083c0}
 Hong Man (hman@stevens.edu), Jeff Thompson (JThomps4@stevens.edu)
 \section{Intro}
-\label{sec:org1c8349e}
+\label{sec:org1a67f2f}
 Telescope is a machine learning assisted toolkit for digital video compositors
 with applications in visual effects, matte painting and diverse use cases
 accross the video post production pipeline. Tools from existing compositing
@@ -62,7 +63,7 @@ is in the process of revolutionizing image processing, and that user driven
 toolkits rather than black box command line workflows will bring our intelligent
 core into the hands of the artists where they can thrive.
 \subsection{Demonstration}
-\label{sec:org5d45776}
+\label{sec:org09e13a6}
 Rotoscoping is the process of frame by frame selecting and isolating a given feature (usually
 an object or person) in a video, such that you can produce a video clip of
 exclusively that selection on a transparent background
@@ -106,7 +107,7 @@ selected before
 \end{itemize}
 \end{itemize}
 \subsubsection{Frame By Frame}
-\label{sec:org669636b}
+\label{sec:org0397971}
 Much of the challenge and tedium of rotoscoping comes from repeating the above
 process for every frame, traditionally, artists will go frame by frame through
 the video and manually adjust their selections to match the feature they are
@@ -122,7 +123,7 @@ this gif that displays the matte on the left, with the source on the right, and
 has selection lines on both
 \url{https://www.google.com/url?sa=i\&rct=j\&q=\&esrc=s\&source=images\&cd=\&cad=rja\&uact=8\&ved=2ahUKEwj4poGei\_bdAhVvTt8KHYSXBs0QjRx6BAgBEAU\&url=https\%3A\%2F\%2Ftaukeke.com\%2F2014\%2F07\%2Frotoscoping-in-nuke\%2F\&psig=AOvVaw0rzB0nhBNxm\_0WD1VdybtL\&ust=1539062086451365}
 \subsubsection{Use Cases}
-\label{sec:org9270459}
+\label{sec:orgc6d9392}
 With our selection isolated, we can start to play with the image accordingly
 
 By layering the source footage and our rotoscoped hand and face, we can apply an
@@ -133,7 +134,7 @@ effect, like the 'colorama' effect to only the pixels we roto'd previously
 \end{center}
 \begin{enumerate}
 \item Compositing
-\label{sec:org0adb506}
+\label{sec:orge93f2f0}
 The most popular use case for rotoscoping is Compositing, which is the process
 of combining multiple images into one. Consider three layers to see how this is
 done.
@@ -160,9 +161,9 @@ and here is the desired effect
 \end{center}
 \end{enumerate}
 \section{Technical Plan}
-\label{sec:org7b86088}
+\label{sec:orgc4e4857}
 \subsection{Components}
-\label{sec:orge132fb6}
+\label{sec:org12acc78}
 Telescope as a product will consist of two primary modules, the Telescope Core,
 which is a machine learning core assisted by traditional algorithmics that
 implements the novel functionality of Telescope, and an exchange plugin that
@@ -193,7 +194,7 @@ Packages & PyTorch\\
 \end{tabular}
 \end{center}
 \subsection{Algorithmics}
-\label{sec:org051187b}
+\label{sec:org6c7a857}
 
 The algorithmic core of our plugin will take images (frames of videos) as input and output segmentation masks (mattes) as output. The goal of the masks is to identify all the discrete objects in the image. It is class-agnostic and therefore does not need to determine what the objects are (e.g. cat or dog) but rather the fact that they are discrete.
 Our criteria for determining how well our model is accomplishing the task is the Intersection-over-Union metric (IoU). We have yet to determine what an acceptable IoU score is for industry applications.
@@ -201,17 +202,17 @@ The model will be a convolutional neural network. Specifically, we will begin wi
 Further iterations of the model will take advantage of the additional information in EXR images to refine object mattes and the DAVIS video object segmentation dataset.
 
 \subsection{Dependency Model}
-\label{sec:orgfdc0da0}
+\label{sec:org0969840}
 \begin{center}
 \includegraphics[width=18cm]{./Dgraph.pdf}
 \end{center}
 \subsection{Plugin UI Mockups}
-\label{sec:org1d58d76}
+\label{sec:orgc9bdd19}
 \begin{center}
 \includegraphics[width=.9\linewidth]{./mockup.png}
 \end{center}
 \subsection{Deep Learning Core}
-\label{sec:org22f488d}
+\label{sec:org8395dbd}
 
 \begin{center}
 \includegraphics[width=.9\linewidth]{/Users/kevinpoli/org/.attach/image1_20181114_122910.png}
@@ -226,13 +227,13 @@ The core of our rotoscoping program is the deep learning model that takes the im
         The second convolutional neural network is much simpler, composed of only a couple convolutional layers similar to the first of the encoder’s. The input to this network is the original image along with the alpha matte produced from the first network. It outputs a refined version of the alpha matte.
         The training process involves feeding the networks images that we also have ground truth alpha mattes for. After the network outputs a prediction for the alpha matte, we compare it with the ground truth alpha matte using a loss function. This loss function is a combination of two loss functions, the alpha prediction loss, and the compositional loss. The former simply calculates the pixel-wise squared error between mattes. The latter does the same calculation but with the original RGB image composited with the ground truth and predicted alpha mattes. Because of the differentiable nature of the loss functions and backpropagation[2], the weights of the neural network are able to be updated to perform the associated task of rotoscoping slightly better after training on each image. We repeatedly train on the entire dataset until improvements become negligible.
 \subsubsection{More Information}
-\label{sec:orgec15ae9}
+\label{sec:org4c4644b}
 \begin{itemize}
 \item \url{https://medium.com/mlreview/a-guide-to-receptive-field-arithmetic-for-convolutional-neural-networks-e0f514068807}
 \item \url{https://medium.com/datathings/neural-networks-and-backpropagation-explained-in-a-simple-way-f540a3611f5e}
 \end{itemize}
 \subsection{Completion Schedule}
-\label{sec:org6a6e700}
+\label{sec:org6ca1953}
 As the models have taken to exceptionally long training times, we have pivoted
 slightly to the goal of having single frame at a time calculated at every frame
 via the plugin utilizing the ML core. This is in contrast to our previous goal
@@ -244,31 +245,31 @@ making mattes and trimaps more consistent across frames.
 \begin{tabularx}{\textwidth}{XXl}
 Applications & Machine Learning & Week\\
 \hline
-\sout{Integrate ML Module Loader into existing plugin Node} & Explore new training schedules and perform hyperparameter tuning & 4\\
+\sout{Integrate ML Module Loader into existing plugin Node} & \sout{Explore new training schedules and perform hyperparameter tuning} & 2/14/\\
 \hline
-Test ML Module Loader on Various Models & Continued refinement on the single frame model & 5\\
+Test ML Module Loader on Various Models & \sout{Continued refinement on the single frame model} & 2/21/\\
 \hline
-Research Image Interpolation & Research into multi-resolution support & 6\\
+\sout{Research Image Interpolation} & Research into multi-resolution support & 2/27/\\
 \hline
-Test interpolations & continued research into resolution independence & 7\\
+\sout{Test interpolations} & continued research into resolution independence & 3/7/\\
 \hline
-Begin integrating interpolation tools & Begin implementing resolution independence & 8\\
+\sout{Begin integrating interpolation tools} & Begin implementing resolution independence & 3/14/\\
 \hline
-Refine interpolation tools & Research ML based frame Interpolation & 9\\
+Refine interpolation tools & Research ML based frame Interpolation & 3/21/\\
 \hline
-Research any additional artist tools required & Research additional ML artist tools & 10\\
+Research any additional artist tools required & Research additional ML artist tools & 3/28/\\
 \hline
-implement additional convenience tools if necessary & implement ML frame interpolation and tools if necessary & 11\\
+implement additional convenience tools if necessary & implement ML frame interpolation and tools if necessary & 4/4/\\
 \hline
-continued refinement & continued refinement & 12\\
+continued refinement & continued refinement & 4/11/\\
 \end{tabularx}
 \end{center}
 
 
 \section{Team}
-\label{sec:org9a20625}
+\label{sec:orgfe8ede7}
 \subsection{Roles}
-\label{sec:org69d7b8f}
+\label{sec:org70817ae}
 \begin{itemize}
 \item Connor O’Hara: Image Processing (cohara1@stevens.edu)
 \item Kevin Poli: Application/ Artist Tools Developer (kpoli@stevens.edu)
@@ -279,88 +280,85 @@ continued refinement & continued refinement & 12\\
 
 
 \subsection{Delegation of Tasks}
-\label{sec:org65bd09b}
+\label{sec:orgfbfdd38}
 
 \subsubsection{Connor O’Hara}
-\label{sec:org6158cc1}
+\label{sec:org1eb55be}
 \begin{enumerate}
 \item Last Week
-\label{sec:org54492d6}
+\label{sec:org5d047d0}
 \begin{itemize}
-\item research into adapting matte to curves
+\item worked on getting GPU resources
 \end{itemize}
 \item Update
-\label{sec:org5906e47}
+\label{sec:orgb027c37}
 \begin{itemize}
-\item still unsure about curve-ifying complex mattes with transparency
+\item meeting hopefully on friday, still in the works. Also began experimentation with trained ML models.
 \end{itemize}
 \item For Next week
-\label{sec:org0adf186}
+\label{sec:orga30c227}
 \begin{itemize}
-\item Research potential alternatives for cleaning up an auto-roto'd shot
+\item revisit getting GPU resources from art department and continue research into the ML model.
 \end{itemize}
 \end{enumerate}
 
 \subsubsection{Kevin Poli}
-\label{sec:org3f240e7}
+\label{sec:org25f3f9a}
 \begin{enumerate}
 \item Last Week
-\label{sec:org4b0abf7}
+\label{sec:org3e92556}
 \begin{itemize}
 \item Resuming work in Nuke, and exploring API for novel interactions
 \end{itemize}
 \item Update
-\label{sec:orgf44ce66}
-\begin{itemize}
-\item Looking to complete TriMap drawing node with support for edge dialations, masks etc.
-\end{itemize}
-\item For Next Week
-\label{sec:orgb6ac926}
+\label{sec:org9450e9e}
 \begin{itemize}
 \item Functional 1-channel 3 color drawing node for TriMaps
 \end{itemize}
+\item For Next Week
+\label{sec:org8f0ba34}
+\begin{itemize}
+\item implement more control over dialations (inside, outside, centering)
+\end{itemize}
 \end{enumerate}
 \subsubsection{Phil Vitale}
-\label{sec:org058af40}
+\label{sec:org0bece8b}
 \begin{enumerate}
 \item Last Week
-\label{sec:org17c4624}
-\begin{itemize}
-\item work will be split into TriMap drawing and module loader nodes
-\end{itemize}
-\item Update
-\label{sec:orgc627a1a}
-\begin{itemize}
-\item work has began on the ML module loader
-\end{itemize}
-\item For Next Week
-\label{sec:orgcb10d61}
+\label{sec:org6286cf2}
 \begin{itemize}
 \item rough draft of the module loader, may be as simple as shellscript/watch folders
 \end{itemize}
-\end{enumerate}
-\subsubsection{Brendan Von Hofe}
-\label{sec:org4a64ff4}
-\begin{enumerate}
-\item Last Week
-\label{sec:org399d8a6}
-Utilizing dilation and erosion algorithms to automatically generate trimaps from
-image mattes. See attached image of dialated trimap
 
-\begin{center}
-\includegraphics[width=.9\linewidth]{/Users/kevinpoli/org/.attach/1133x794_20181105_130958.png}
-\end{center}
 \item Update
-\label{sec:orgcfc0503}
+\label{sec:orgd2dea7e}
 \begin{itemize}
-\item We have begun training the model, initial results even at low training times
-are looking good. A high level explaination of our techniques has been
-included above.
+\item work on module loader continues, investigation into calling python scripting
+from C++ NDK is promising.
 \end{itemize}
 \item For Next Week
-\label{sec:org6508a78}
+\label{sec:org842bf87}
 \begin{itemize}
-\item continue iterating on the model, and explore options for further fine tuning
+\item functional module loader, no shellscript/watch folders
+\end{itemize}
+\end{enumerate}
+\subsubsection{Brendan Von Hofe}
+\label{sec:orgcf2c0b9}
+\begin{enumerate}
+\item Last Week
+\label{sec:orgd9db3d5}
+\begin{itemize}
+\item Fine-tune the model and optimize hyperparameters for better quality outputs.
+\end{itemize}
+\item Update
+\label{sec:org529ea85}
+\begin{itemize}
+\item Re-organized the code, wrote build scripts, etc. to allow for easy experimentation on various machines. Logging has also been improved to thoroughly report on results from experiments.
+\end{itemize}
+\item For Next Week
+\label{sec:org6f04037}
+\begin{itemize}
+\item Begin testing on cloud and read research papers to illuminate potential areas of improvement. \url{https://arxiv.org/pdf/1707.08289v1.pdf}
 \end{itemize}
 \end{enumerate}
 \end{document}

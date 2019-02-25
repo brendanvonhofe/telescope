@@ -156,25 +156,25 @@ may still come to the plugin, but it is likely that they will arrive as
 traditionally algorithmic and not ML based features, as there are already algorithmic techniques for
 making mattes and trimaps more consistent across frames.
 #+ATTR_LATEX: :environment tabularx :width \textwidth :align XXl
-| Applications                                           | Machine Learning                                                 | Week |
-|--------------------------------------------------------+------------------------------------------------------------------+------|
-| +Integrate ML Module Loader into existing plugin Node+ | Explore new training schedules and perform hyperparameter tuning |    4 |
-|--------------------------------------------------------+------------------------------------------------------------------+------|
-| Test ML Module Loader on Various Models                | Continued refinement on the single frame model                   |    5 |
-|--------------------------------------------------------+------------------------------------------------------------------+------|
-| Research Image Interpolation                           | Research into multi-resolution support                           |    6 |
-|--------------------------------------------------------+------------------------------------------------------------------+------|
-| Test interpolations                                    | continued research into resolution independence                  |    7 |
-|--------------------------------------------------------+------------------------------------------------------------------+------|
-| Begin integrating interpolation tools                  | Begin implementing resolution independence                       |    8 |
-|--------------------------------------------------------+------------------------------------------------------------------+------|
-| Refine interpolation tools                             | Research ML based frame Interpolation                            |    9 |
-|--------------------------------------------------------+------------------------------------------------------------------+------|
-| Research any additional artist tools required          | Research additional ML artist tools                              |   10 |
-|--------------------------------------------------------+------------------------------------------------------------------+------|
-| implement additional convenience tools if necessary    | implement ML frame interpolation and tools if necessary          |   11 |
-|--------------------------------------------------------+------------------------------------------------------------------+------|
-| continued refinement                                   | continued refinement                                             |   12 |
+| Applications                                           | Machine Learning                                                   | Week  |
+|--------------------------------------------------------+--------------------------------------------------------------------+-------|
+| +Integrate ML Module Loader into existing plugin Node+ | +Explore new training schedules and perform hyperparameter tuning+ | 2/14/ |
+|--------------------------------------------------------+--------------------------------------------------------------------+-------|
+| Test ML Module Loader on Various Models                | +Continued refinement on the single frame model+                   | 2/21/ |
+|--------------------------------------------------------+--------------------------------------------------------------------+-------|
+| +Research Image Interpolation+                         | Research into multi-resolution support                             | 2/27/ |
+|--------------------------------------------------------+--------------------------------------------------------------------+-------|
+| +Test interpolations+                                  | continued research into resolution independence                    | 3/7/  |
+|--------------------------------------------------------+--------------------------------------------------------------------+-------|
+| +Begin integrating interpolation tools+                | Begin implementing resolution independence                         | 3/14/ |
+|--------------------------------------------------------+--------------------------------------------------------------------+-------|
+| Refine interpolation tools                             | Research ML based frame Interpolation                              | 3/21/ |
+|--------------------------------------------------------+--------------------------------------------------------------------+-------|
+| Research any additional artist tools required          | Research additional ML artist tools                                | 3/28/ |
+|--------------------------------------------------------+--------------------------------------------------------------------+-------|
+| implement additional convenience tools if necessary    | implement ML frame interpolation and tools if necessary            | 4/4/  |
+|--------------------------------------------------------+--------------------------------------------------------------------+-------|
+| continued refinement                                   | continued refinement                                               | 4/11/ |
 
 
 * Team
@@ -190,35 +190,32 @@ making mattes and trimaps more consistent across frames.
 
 *** Connor O’Hara
 **** Last Week
-- research into adapting matte to curves
+- worked on getting GPU resources
 **** Update
-- still unsure about curve-ifying complex mattes with transparency
+- meeting hopefully on friday, still in the works. Also began experimentation with trained ML models.
 **** For Next week
-- Research potential alternatives for cleaning up an auto-roto'd shot
+- revisit getting GPU resources from art department and continue research into the ML model.
 
 *** Kevin Poli
 **** Last Week
 - Resuming work in Nuke, and exploring API for novel interactions
 **** Update
-- Looking to complete TriMap drawing node with support for edge dialations, masks etc.
-**** For Next Week
 - Functional 1-channel 3 color drawing node for TriMaps
+**** For Next Week
+- implement more control over dialations (inside, outside, centering)
 *** Phil Vitale
 **** Last Week
-- work will be split into TriMap drawing and module loader nodes
+- rough draft of the module loader, may be as simple as shellscript/watch folders
+
 **** Update
-- work has began on the ML module loader
+- work on module loader continues, investigation into calling python scripting
+  from C++ NDK is promising.
 **** For Next Week
- - rough draft of the module loader, may be as simple as shellscript/watch folders
+- functional module loader, no shellscript/watch folders
 *** Brendan Von Hofe
 **** Last Week
-Utilizing dilation and erosion algorithms to automatically generate trimaps from
-image mattes. See attached image of dialated trimap
-
-[[attach:1133x794_20181105_130958.png]]
+- Fine-tune the model and optimize hyperparameters for better quality outputs.
 **** Update
-- We have begun training the model, initial results even at low training times
-  are looking good. A high level explaination of our techniques has been
-  included above.
+- Re-organized the code, wrote build scripts, etc. to allow for easy experimentation on various machines. Logging has also been improved to thoroughly report on results from experiments.
 **** For Next Week
-- continue iterating on the model, and explore options for further fine tuning
+- Begin testing on cloud and read research papers to illuminate potential areas of improvement. https://arxiv.org/pdf/1707.08289v1.pdf
