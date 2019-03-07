@@ -42,9 +42,9 @@ all: ndkexists $(PLUGINS)
 	$(COMPILER) $(CXXFLAGS) -o lib$(@) $<
 
 ndkexists:
-	if test -d $(NDKDIR); \
-	then echo "using NDKDIR from ${NDKDIR}"; \
-	else echo "NDKDIR dir not found! Please set NDKDIR"; exit 2; \
+	if test -d $(NUKE_DIR); \
+	then echo "using NUKE_DIR from ${NUKE_DIR}"; \
+	else echo "NUKE_DIR dir not found! Please set NUKE_DIR"; exit 2; \
 	fi
 clean:
 	rm -rf *.os \
