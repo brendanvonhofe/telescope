@@ -18,6 +18,7 @@ else
     COMPILER += clang++
     LINK += clang++
     CXXFLAGS += -I $(NUKE_DIR) \
+		-fPIC -msse \
 		-F/Applications/Nuke11.2v4/Nuke11.2v4.app/Contents/Frameworks
     LINKFLAGS += -L $(NUKE_DIR) -L ./ -bundle
     LIBS += -framework QuartzCore \
